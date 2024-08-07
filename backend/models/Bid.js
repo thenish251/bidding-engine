@@ -13,7 +13,11 @@ const bidSchema = new mongoose.Schema({
   startTime: Date,
   endTime: Date,
   published: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now }
-});
+  createdAt: { type: Date, default: Date.now },
+  bidderResponses: [{
+    bidderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    response: { type: String, enum: ['accept', 'reject'] }
+}]
+}, { timestamps: true });
 
 module.exports = mongoose.model('Bid', bidSchema);
