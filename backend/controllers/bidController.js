@@ -152,6 +152,18 @@ exports.placeBidAmount = async (req, res) => {
     }
 };
 
+exports.getBidById = async (req, res) => {
+    try {
+      const bid = await Bid.findById(req.params.id).populate('items.bidder', 'username'); // Assuming you have a reference to the bidder in the item
+      if (!bid) {
+        return res.status(404).json({ message: 'Bid not found' });
+      }
+      res.status(200).json(bid);
+    } catch (error) {
+      res.status(500).json({ message: 'Server error', error: error.message });
+    }
+  };
+  
 
 exports.deleteBid = async (req, res) => {
   try {
@@ -162,11 +174,11 @@ exports.deleteBid = async (req, res) => {
   }
 };
 
-exports.getBidById = async (req, res) => {
+exports.getAllBids = async (req, res) => {
   try {
-    const bid = await Bid.findById(req.params.id).populate('creator').populate('bidders');
-    res.status(200).json(bid);
+    const bids = await Bid.find().populate('creator').populate('bidders');
+    res.status(200).json(bids);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };

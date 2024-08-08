@@ -15,5 +15,7 @@ router.put('/bids/:id/invite', bidController.inviteBidders);
 router.put('/bids/:id/respond', bidController.respondToBid);
 // Route for placing a bid amount
 router.put('/bids/:id/place', bidController.placeBidAmount);
+router.get('/bids', bidController.getAllBids);
+
 
 module.exports = router;
