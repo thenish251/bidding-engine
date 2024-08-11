@@ -1,98 +1,78 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-function CreateBid() {
+const CreateBid = () => {
   const [title, setTitle] = useState('');
   const [items, setItems] = useState([{ description: '' }]);
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
-
+  const [creator, setCreator] = useState(''); 
+  
   const handleAddItem = () => {
     setItems([...items, { description: '' }]);
   };
 
-  const handleItemChange = (index, event) => {
-    const newItems = [...items];
-    newItems[index].description = event.target.value;
-    setItems(newItems);
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/api/bids', {
-        title,
-        items,
-        startTime,
-        endTime,
-        creator: "66b3584e0a4dfe0cfd5ba789"  
-      });
-      console.log('Bid created:', response.data);
+      await axios.post('http://localhost:5000/api/bids', { title, items, startTime, endTime, creator });
       alert('Bid created successfully');
     } catch (error) {
       console.error('Error creating bid:', error);
-      alert('Error creating bid');
     }
   };
 
   return (
-    <div>
-      <h2 className="text-xl font-bold mb-4">Create a New Bid</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label className="block text-gray-700">Title:</label>
-          <input
-            type="text"
-            className="border rounded w-full py-2 px-3"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-        </div>
-        {items.map((item, index) => (
-          <div key={index} className="mb-4">
-            <label className="block text-gray-700">Item {index + 1}:</label>
-            <input
-              type="text"
-              className="border rounded w-full py-2 px-3"
-              value={item.description}
-              onChange={(event) => handleItemChange(index, event)}
-            />
-          </div>
-        ))}
-        <button
-          type="button"
-          onClick={handleAddItem}
-          className="bg-blue-500 text-white py-2 px-4 rounded"
-        >
-          Add Another Item
-        </button>
-        <div className="mb-4 mt-4">
-          <label className="block text-gray-700">Start Time:</label>
-          <input
-            type="datetime-local"
-            className="border rounded w-full py-2 px-3"
-            value={startTime}
-            onChange={(e) => setStartTime(e.target.value)}
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">End Time:</label>
-          <input
-            type="datetime-local"
-            className="border rounded w-full py-2 px-3"
-            value={endTime}
-            onChange={(e) => setEndTime(e.target.value)}
-          />
-        </div>
-        <button
-          type="submit"
-          className="bg-green-500 text-white py-2 px-4 rounded"
-        >
-          Create Bid
-        </button>
-      </form>
+    <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded">
+      <h1 className="text-2xl mb-4">Create Bid</h1>
+      <input
+        type="text"
+        className="border p-2 mb-4 w-full"
+        placeholder="Bid Title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+      />
+      {items.map((item, index) => (
+        <input
+          key={index}
+          type="text"
+          className="border p-2 mb-4 w-full"
+          placeholder="Item Description"
+          value={item.description}
+          onChange={(e) => {
+            const newItems = [...items];
+            newItems[index].description = e.target.value;
+            setItems(newItems);
+          }}
+        />
+      ))}
+      <button
+        className="bg-blue-500 text-white px-4 py-2 mb-4"
+        onClick={handleAddItem}
+      >
+        Add Item
+      </button>
+      <input
+        type="datetime-local"
+        className="border p-2 mb-4 w-full"
+        placeholder="Start Time"
+        value={startTime}
+        onChange={(e) => setStartTime(e.target.value)}
+      />
+      <input
+        type="datetime-local"
+        className="border p-2 mb-4 w-full"
+        placeholder="End Time"
+        value={endTime}
+        onChange={(e) => setEndTime(e.target.value)}
+      />
+      <button
+        className="bg-green-500 text-white px-4 py-2"
+        onClick={handleSubmit}
+      >
+        Create Bid
+      </button>
     </div>
   );
-}
+};
 
 export default CreateBid;

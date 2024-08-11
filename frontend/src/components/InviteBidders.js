@@ -1,74 +1,82 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-function InviteBidders() {
-  const [bidId, setBidId] = useState('');
-  const [bidders, setBidders] = useState(['']);
+const InviteBidders = () => {
+  const [bids, setBids] = useState([]);
+  const [selectedBid, setSelectedBid] = useState('');
+  const [users, setUsers] = useState([]);
+  const [selectedBidders, setSelectedBidders] = useState([]); // Add this state
 
-  const handleAddBidder = () => {
-    setBidders([...bidders, '']);
-  };
+  useEffect(() => {
+    const fetchBids = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/bids');
+        setBids(response.data);
+      } catch (error) {
+        console.error('Error fetching bids:', error);
+      }
+    };
 
-  const handleBidderChange = (index, event) => {
-    const newBidders = [...bidders];
-    newBidders[index] = event.target.value;
-    setBidders(newBidders);
-  };
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/users');
+        setUsers(response.data);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+    fetchBids();
+    fetchUsers();
+  }, []);
+
+  const handleInvite = async () => {
     try {
-      const response = await axios.put(`http://localhost:5000/api/bids/${bidId}/invite`, {
-        bidders,
-      });
-      console.log('Bidders invited:', response.data);
-      alert('Bidders invited successfully');
+      await axios.put(`http://localhost:5000/api/bids/${selectedBid}/invite`, { bidders: selectedBidders });
+      alert('Invitations sent');
     } catch (error) {
       console.error('Error inviting bidders:', error);
-      alert('Error inviting bidders');
     }
   };
 
   return (
-    <div>
-      <h2 className="text-xl font-bold mb-4">Invite Bidders</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label className="block text-gray-700">Bid ID:</label>
-          <input
-            type="text"
-            className="border rounded w-full py-2 px-3"
-            value={bidId}
-            onChange={(e) => setBidId(e.target.value)}
-          />
-        </div>
-        {bidders.map((bidder, index) => (
-          <div key={index} className="mb-4">
-            <label className="block text-gray-700">Bidder {index + 1} ID:</label>
-            <input
-              type="text"
-              className="border rounded w-full py-2 px-3"
-              value={bidder}
-              onChange={(event) => handleBidderChange(index, event)}
-            />
-          </div>
+    <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded">
+      <h1 className="text-2xl mb-4">Invite Bidders</h1>
+      <select
+        className="border p-2 mb-4 w-full"
+        value={selectedBid}
+        onChange={(e) => setSelectedBid(e.target.value)}
+      >
+        <option value="">Select Bid</option>
+        {bids.map(bid => (
+          <option key={bid._id} value={bid._id}>{bid.title}</option>
         ))}
-        <button
-          type="button"
-          onClick={handleAddBidder}
-          className="bg-blue-500 text-white py-2 px-4 rounded"
-        >
-          Add Another Bidder
-        </button>
-        <button
-          type="submit"
-          className="bg-green-500 text-white py-2 px-4 rounded mt-4"
-        >
-          Invite Bidders
-        </button>
-      </form>
+      </select>
+      <ul>
+        {users.map(user => (
+          <li key={user._id} className="border p-2 mb-2">
+            <input
+              type="checkbox"
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setSelectedBidders(prev => [...prev, user._id]);
+                } else {
+                  setSelectedBidders(prev => prev.filter(id => id !== user._id));
+                }
+              }}
+            />
+            {user.username}
+          </li>
+        ))}
+      </ul>
+      <button
+        className="bg-blue-500 text-white px-4 py-2"
+        onClick={handleInvite}
+      >
+        Invite Bidders
+      </button>
     </div>
   );
-}
+};
 
 export default InviteBidders;

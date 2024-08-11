@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
 
-function ViewBids() {
+const ViewBids = () => {
   const [bids, setBids] = useState([]);
 
   useEffect(() => {
@@ -14,28 +13,42 @@ function ViewBids() {
         console.error('Error fetching bids:', error);
       }
     };
-
     fetchBids();
   }, []);
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-4">All Bids</h2>
-      {bids.length > 0 ? (
-        <ul className="list-disc pl-5">
-          {bids.map(bid => (
-            <li key={bid._id}>
-              <Link to={`/view-bids/${bid._id}`} className="text-blue-500 hover:underline">
-                {bid.title}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No bids available.</p>
-      )}
+      <h1 className="text-2xl mb-4">View Bids</h1>
+      {bids.map(bid => (
+        <div key={bid._id} className="border p-4 mb-4">
+          <h2 className="text-xl mb-2">Title: {bid.title}</h2>
+          <ul>
+            {bid.items.map(item => {
+              const itemBids = bid.bidders
+                .filter(bidder => bidder.itemId === item._id)
+                .sort((a, b) => b.amount - a.amount);
+              const highestBid = itemBids.length > 0 ? itemBids[0] : null;
+
+              return (
+                <li key={item._id} className="border p-2 mb-2">
+                  <p>Item: {item.description}</p>
+                  <p>Highest Bidder: {highestBid ? `${highestBid.userId} - $${highestBid.amount}` : 'No bids yet'}</p>
+                  <ul>
+                    {itemBids.map(bidderBid => (
+                      <li key={bidderBid._id} className="border p-2 mb-2">
+                        <p>Bidder: {bidderBid.userId}</p>
+                        <p>Amount: ${bidderBid.amount}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
     </div>
   );
-}
+};
 
 export default ViewBids;
